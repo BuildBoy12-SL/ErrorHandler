@@ -1,18 +1,34 @@
+// -----------------------------------------------------------------------
+// <copyright file="EventHandlers.cs" company="Build">
+// Copyright (c) Build. All rights reserved.
+// Licensed under the CC BY-SA 3.0 license.
+// </copyright>
+// -----------------------------------------------------------------------
+
 namespace ErrorHandler
 {
     using UnityEngine;
 
-    public partial class EventHandlers
+    /// <summary>
+    /// Handles all required events.
+    /// </summary>
+    public class EventHandlers
     {
-        public EventHandlers(Config config) => _config = config;
-        private readonly Config _config;
+        private readonly Plugin plugin;
 
-        internal void LogCallback(string condition, string stackTrace, LogType type)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventHandlers"/> class.
+        /// </summary>
+        /// <param name="plugin">An instance of the <see cref="Plugin"/> class.</param>
+        public EventHandlers(Plugin plugin) => this.plugin = plugin;
+
+        /// <inheritdoc cref="Application.logMessageReceived"/>
+        public void LogCallback(string condition, string stackTrace, LogType type)
         {
             if (type != LogType.Exception)
                 return;
 
-            SendMessage(string.Empty, $"{condition}\n{stackTrace}");
+            plugin.WebhookController.SendMessage(string.Empty, $"{condition}\n{stackTrace}");
         }
     }
 }

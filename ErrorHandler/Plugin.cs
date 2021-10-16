@@ -1,22 +1,53 @@
-﻿namespace ErrorHandler
+﻿// -----------------------------------------------------------------------
+// <copyright file="Plugin.cs" company="Build">
+// Copyright (c) Build. All rights reserved.
+// Licensed under the CC BY-SA 3.0 license.
+// </copyright>
+// -----------------------------------------------------------------------
+
+namespace ErrorHandler
 {
-    using DSharp4Webhook.Core;
+    using System;
     using Exiled.API.Enums;
     using Exiled.API.Features;
     using HarmonyLib;
-    using System;
     using UnityEngine;
 
-    public class Plugin : Plugin<Config>
+    /// <summary>
+    /// The main plugin class.
+    /// </summary>
+    public class Plugin : Plugin<Config, Translation>
     {
-        internal static Plugin Singleton;
+        private Harmony harmony;
 
-        internal EventHandlers EventHandlers;
+        /// <summary>
+        /// Gets the only existing instance of the <see cref="Plugin"/> class.
+        /// </summary>
+        public static Plugin Instance { get; private set; }
 
-        internal IWebhook Webhook;
-        
-        private Harmony _harmony;
+        /// <summary>
+        /// Gets an instance of the <see cref="ErrorHandler.EventHandlers"/> class.
+        /// </summary>
+        public EventHandlers EventHandlers { get; private set; }
 
+        /// <summary>
+        /// Gets an instance of the <see cref="ErrorHandler.WebhookController"/> class.
+        /// </summary>
+        public WebhookController WebhookController { get; private set; }
+
+        /// <inheritdoc />
+        public override string Author { get; } = "Build";
+
+        /// <inheritdoc />
+        public override PluginPriority Priority { get; } = PluginPriority.Highest;
+
+        /// <inheritdoc />
+        public override Version RequiredExiledVersion { get; } = new Version(3, 0, 5);
+
+        /// <inheritdoc />
+        public override Version Version { get; } = new Version(1, 0, 0);
+
+        /// <inheritdoc />
         public override void OnEnabled()
         {
             if (string.IsNullOrEmpty(Config.WebhookUrl))
@@ -25,34 +56,32 @@
                 return;
             }
 
-            Singleton = this;
-            EventHandlers = new EventHandlers(Config);
+            Instance = this;
+
+            harmony = new Harmony($"errorHandler.{DateTime.UtcNow.Ticks}");
+            harmony.PatchAll();
+
+            EventHandlers = new EventHandlers(this);
             Application.logMessageReceived += EventHandlers.LogCallback;
 
-            _harmony = new Harmony($"exceptionhandler.build.exiled.{DateTime.UtcNow.Ticks}");
-            _harmony.PatchAll();
-
-            Webhook = WebhookProvider.CreateStaticWebhook(Config.WebhookUrl);
-
+            WebhookController = new WebhookController(this);
             base.OnEnabled();
         }
 
+        /// <inheritdoc />
         public override void OnDisabled()
         {
             Application.logMessageReceived -= EventHandlers.LogCallback;
             EventHandlers = null;
 
-            Webhook?.Dispose();
+            WebhookController.Dispose();
+            WebhookController = null;
 
-            _harmony.UnpatchAll(_harmony.Id);
+            harmony.UnpatchAll(harmony.Id);
+            harmony = null;
 
-            Singleton = null;
+            Instance = null;
             base.OnDisabled();
         }
-
-        public override string Author { get; } = "Build";
-        public override PluginPriority Priority { get; } = PluginPriority.Highest;
-        public override Version RequiredExiledVersion { get; } = new Version(2, 3, 4);
-        public override Version Version { get; } = new Version(1, 0, 0);
     }
 }
