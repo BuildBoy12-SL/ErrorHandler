@@ -39,6 +39,12 @@ namespace ErrorHandler
         public override string Author { get; } = "Build";
 
         /// <inheritdoc />
+        public override string Name { get; } = "ErrorHandler";
+
+        /// <inheritdoc />
+        public override string Prefix { get; } = "ErrorHandler";
+
+        /// <inheritdoc />
         public override PluginPriority Priority { get; } = PluginPriority.Highest;
 
         /// <inheritdoc />
