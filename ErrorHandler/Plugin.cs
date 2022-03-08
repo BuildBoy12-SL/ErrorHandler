@@ -19,6 +19,7 @@ namespace ErrorHandler
     public class Plugin : Plugin<Config, Translation>
     {
         private Harmony harmony;
+        private EventHandlers eventHandlers;
 
         /// <summary>
         /// Gets the only existing instance of the <see cref="Plugin"/> class.
@@ -26,29 +27,24 @@ namespace ErrorHandler
         public static Plugin Instance { get; private set; }
 
         /// <summary>
-        /// Gets an instance of the <see cref="ErrorHandler.EventHandlers"/> class.
-        /// </summary>
-        public EventHandlers EventHandlers { get; private set; }
-
-        /// <summary>
         /// Gets an instance of the <see cref="ErrorHandler.WebhookController"/> class.
         /// </summary>
         public WebhookController WebhookController { get; private set; }
 
         /// <inheritdoc />
-        public override string Author { get; } = "Build";
+        public override string Author => "Build";
 
         /// <inheritdoc />
-        public override string Name { get; } = "ErrorHandler";
+        public override string Name => "ErrorHandler";
 
         /// <inheritdoc />
-        public override string Prefix { get; } = "ErrorHandler";
+        public override string Prefix => "ErrorHandler";
 
         /// <inheritdoc />
-        public override PluginPriority Priority { get; } = PluginPriority.Highest;
+        public override PluginPriority Priority => PluginPriority.Highest;
 
         /// <inheritdoc />
-        public override Version RequiredExiledVersion { get; } = new Version(4, 1, 5);
+        public override Version RequiredExiledVersion { get; } = new Version(5, 0, 0);
 
         /// <inheritdoc />
         public override void OnEnabled()
@@ -64,8 +60,8 @@ namespace ErrorHandler
             harmony = new Harmony($"errorHandler.{DateTime.UtcNow.Ticks}");
             harmony.PatchAll();
 
-            EventHandlers = new EventHandlers(this);
-            Application.logMessageReceived += EventHandlers.LogCallback;
+            eventHandlers = new EventHandlers(this);
+            Application.logMessageReceived += eventHandlers.LogCallback;
 
             WebhookController = new WebhookController(this);
             base.OnEnabled();
@@ -74,8 +70,8 @@ namespace ErrorHandler
         /// <inheritdoc />
         public override void OnDisabled()
         {
-            Application.logMessageReceived -= EventHandlers.LogCallback;
-            EventHandlers = null;
+            Application.logMessageReceived -= eventHandlers.LogCallback;
+            eventHandlers = null;
 
             WebhookController.Dispose();
             WebhookController = null;
