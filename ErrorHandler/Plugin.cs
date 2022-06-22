@@ -44,7 +44,7 @@ namespace ErrorHandler
         public override PluginPriority Priority => PluginPriority.Highest;
 
         /// <inheritdoc />
-        public override Version RequiredExiledVersion { get; } = new Version(5, 0, 0);
+        public override Version RequiredExiledVersion { get; } = new Version(5, 2, 1);
 
         /// <inheritdoc />
         public override void OnEnabled()

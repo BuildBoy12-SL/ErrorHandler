@@ -15,10 +15,10 @@ namespace ErrorHandler.Patches
     /// <summary>
     /// Patches <see cref="Log.Error(object)"/> to implement <see cref="WebhookController.SendMessage"/>.
     /// </summary>
-    [HarmonyPatch(typeof(Log), nameof(Log.Error))]
+    [HarmonyPatch(typeof(Log), nameof(Log.Error), typeof(object))]
     internal static class ErrorPatch
     {
-        private static void Postfix(string message)
+        private static void Postfix(object message)
         {
             Plugin.Instance.WebhookController.SendMessage(Assembly.GetCallingAssembly().GetName().Name, $"```{message}```");
         }

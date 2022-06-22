@@ -25,10 +25,8 @@ namespace ErrorHandler
         /// <inheritdoc cref="Application.logMessageReceived"/>
         public void LogCallback(string condition, string stackTrace, LogType type)
         {
-            if (type != LogType.Exception)
-                return;
-
-            plugin.WebhookController.SendMessage(string.Empty, $"{condition}\n{stackTrace}");
+            if (type == LogType.Exception)
+                plugin.WebhookController.SendMessage(string.Empty, $"{condition}\n{stackTrace}");
         }
     }
 }
